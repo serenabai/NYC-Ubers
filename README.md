@@ -28,39 +28,25 @@ The first research question has the potential to give Uber driver’s more pay a
 We used Causal Inference to answer our first question of the effects of ride-share trip minutes on Uber driver pay, because we wanted to see the extent to which driver pay is influenced by trip minutes. We knew our dataset had confounding variables (trip_miles and weekend), so we took those into account by including them in our model. We used GLMs & Nonparametric Methods to answer how factors such as trip miles, trip minutes, and precipitation predict driver pay. Using GLMs helped us see the linear relationship between the response and predictors without assuming the underlying relationship is linear. We also had a lot of data with little prior knowledge about the distributions, so we used Nonparametric Methods to compare with our GLMs results.
 
 ## EDA
-Quantitative variables:
-- Driver pay
-- Trip miles
-- Trip minutes
-- Temperature
-- Precipitation
-  
-Categorical variables
-- Hour
-- Day of week
-- Weekend
-  
-Visualizations
-- Distribution of driver pay
-- Trip miles vs trip minutes vs driver pay
-- Driver pay vs hour (cumulative and separated by day of week)
-- Histogram of driver pay on weekends vs weekdays
-- Histogram of trip minutes on weekends vs weekdays
-- Scatterplot of temperature vs driver pay
-- Scatterplot of precipitation vs driver pay
 
-![Uploading Screen Shot 2023-07-01 at 10.29.23 PM.png…]()
-
-
-
-
-## EDA Trends
+<img width="567" alt="Screen Shot 2023-07-01 at 10 35 22 PM" src="https://github.com/serenabai/NYC-Ubers/assets/78036684/376a3c5f-6daa-4197-bad1-82f338a7d141">
 
 First we plotted the distribution of driver pay, which is important to understand as we explore the effect of other variables on this variable. We noticed that the distribution peaks close to zero, which makes sense since the majority of Uber rides within New York likely tend to be shorter. However, there seem to be some very large outliers, as the distribution extends to almost 1750. This is important to consider as we continue our analysis of the data. 
 
+
+<img width="562" alt="Screen Shot 2023-07-01 at 10 29 15 PM" src="https://github.com/serenabai/NYC-Ubers/assets/78036684/b489b79b-c8ee-416f-8532-66ed0e63afe9">
+
 Through the pairplot, we can see that there is a positive linear correlation between trip minutes and driver pay and trip miles and driver pay. We are interested in finding the coefficients of these relationships, so we can see just how much trip miles and trip minutes affect driver pay.  In addition, we found that the distributions of each of these variables seem approximately normal with a right skew, which will motivate how we build our Bayesian GLM model.
 
+<img width="633" alt="Screen Shot 2023-07-01 at 10 29 23 PM" src="https://github.com/serenabai/NYC-Ubers/assets/78036684/9a390cc7-f976-4cd2-9a95-0c4b4e56a7a5">
+
+<img width="410" alt="Screen Shot 2023-07-01 at 10 29 07 PM" src="https://github.com/serenabai/NYC-Ubers/assets/78036684/ab3c5c5c-5c16-42a7-b933-37979b4de9b0">
+
 We also saw that there is a difference in the trajectory of driver pay throughout the day depending on the day of the week. By comparing the graphs of the cumulative mean pay per hour vs the graph separated by weekday, we can see that there are certain patterns that become lost when only considering the cumulative mean pay. To explore this further, we plotted histograms of driver pay on weekends and weekdays, and trip minutes on weekends and weekdays. Although the graph does not show a significant difference, our intuition says that whether the ride takes place on a weekend could be a confounder between driver pay and trip miles, so we want to explore this further in our analysis. 
+
+<img width="420" alt="Screen Shot 2023-07-01 at 10 34 05 PM" src="https://github.com/serenabai/NYC-Ubers/assets/78036684/6f7b061b-7c06-44a8-95dd-f718d45961b0">
+
+<img width="454" alt="Screen Shot 2023-07-01 at 10 34 09 PM" src="https://github.com/serenabai/NYC-Ubers/assets/78036684/6bf13a9d-b7e8-4a4b-a2d6-0179d2f2baa1">
 
 Finally, we plotted the relationships of temperature and precipitation vs driver pay to see how weather affects our variable of interest. These scatterplots show a positive relationship between both temperature and driver pay and precipitation and driver pay, which we will investigate further in our analysis portion. 
 
