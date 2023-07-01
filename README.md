@@ -4,17 +4,7 @@
 ## Data Overview 
 We are analyzing high volume for-hire vehicles (FHV) trip data. The data is from the NYC Taxi and Limousine Commission (TLC) and collected by technology providers authorized under the Taxicab & Livery Passenger Enhancement Programs. We decided to subset the data to only Uber trips for the first full week of April 2022 (April 3rd-10th) as the overall April 2022 dataset is too large, with over 16 million rows of data. Our data of interest filters only for Uber rides that were taken in NYC, which represents approximately 73% of the rides taken. We also chose to include weather data sourced from the open-meteo API in order to see how precipitation affected driver pay. 
 
-Though our data represents just a sample of the Uber rides taken in the country because we are only focusing on NYC, we are unable to see the data for Uber rides spanning the U.S. However, we can compare the week of data from April 2022 to the NYC Uber rides data from the entirety of the month of April 2022. The collected data represents every single taxi or ride-share ride that was taken in NYC. Most riders and drivers may be unaware that this data was collected, but the NYC Taxi and Limousine Commission authorizes the collection of this data. Essentially, ride-share providers such as Uber and Lyft report their NYC trip data to the TLC.
-
 Each row in our dataset represents a single trip in an Uber dispatched by one of NYC’s licensed high volume FHV bases. This means that our data is very granular, given there could be tens of thousands of rides within one hour. Thus, in order to effectively analyze our data, we will need to group by hour in many cases, meaning we could be missing important patterns that occur within one hour. High granularity does also have benefits, since it means that although we narrowed our frame to only one week, we still have many data points to work with.
-
-There was selection bias in selecting our one week of April subset of the entire 2022 year’s ride-share dataset. We can’t account for proper randomization of our data and the sample obtained may not be a complete representation of our entire dataset, but because our dataset was too big, we had to sacrifice selection bias. Measurement error could also be relevant in our data as the website states “we cannot guarantee or confirm their accuracy or completeness”. 
-
-Some additional features we wished we had that would improve the specificity of our data include the following: 
-A measure for traffic: Traffic can affect the expected vs actual ETA which could then affect the driver’s pay and reviews. 
-Number of stop lights: Similar to a measure of traffic, stop lights could affect the estimated drive time and the expected base pay and driver pay. 
-Whether or not there was surge pricing: Popular areas and times of day affect pricing when there is an increased demand and limited supply for Ubers. This information could have been useful in estimating how certain geographic locations were affected surge pricing throughout the day. 
-Expected length (minutes) of trip: The expected minutes for the trip may be useful in predicting driver pay because the driver pay likely doesn’t account for traffic that shows up in the middle of a ride.
 
 ## Research Questions
 Our research questions that we seek to answer in our analysis are below:
@@ -24,8 +14,6 @@ Our research questions that we seek to answer in our analysis are below:
 - How do factors such as trip miles, trip minutes, and precipitation predict driver pay? (GLMs & Nonparametric Methods)
 
 The first research question has the potential to give Uber driver’s more pay autonomy. Recently, Uber unveiled a new feature that allows drivers to choose the trips they want to, so by understanding the correlation between trip minutes and driver pay, Uber drivers can have the autonomy to choose durations and types of trips to maximize their earnings. Our second question also gives Uber drivers greater pay autonomy. If certain lengths and durations of trips and types of weather are associated with a greater pay, drivers can also have the autonomy to choose certain days to provide rides based on the weather forecast or types of trips depending on the weather forecast. 
-
-We used Causal Inference to answer our first question of the effects of ride-share trip minutes on Uber driver pay, because we wanted to see the extent to which driver pay is influenced by trip minutes. We knew our dataset had confounding variables (trip_miles and weekend), so we took those into account by including them in our model. We used GLMs & Nonparametric Methods to answer how factors such as trip miles, trip minutes, and precipitation predict driver pay. Using GLMs helped us see the linear relationship between the response and predictors without assuming the underlying relationship is linear. We also had a lot of data with little prior knowledge about the distributions, so we used Nonparametric Methods to compare with our GLMs results.
 
 ## EDA
 
@@ -65,21 +53,6 @@ The data cleaning steps we took were:
 - For our GLM model, filtered for only rides where driver pay was greater than zero
   - Necessary in order to run the GLM regression without linear algebra errors
 
-Our visualizations are relevant for the following reasons:
-Distribution of driver pay
-- Since this is our dependent variable, we should understand the shape of its distribution before proceeding with our analysis, therefore it is relevant to both questions.
-
-Trip miles vs trip minutes vs driver pay
-- By plotting trip minutes and trip miles against driver pay, we can see that there is indeed a positive correlation between these variables and driver pay. This suggests that there could be a causal relationship, which suggests a solution to our first research question — that there is a causal relationship. This also motivates our second question, suggesting that trip miles and trip minutes should be included in our GLM and nonparametric models.
-
-Driver pay vs hour (cumulative and separated by day of week)
-- Plotting driver pay on different days of the week, as well as on weekends vs. weekdays showed that the trajectory of pay over the course of the day changes based on the day of the week. This shows a potential confounder, which we would need to take into account for our first research question.
-
-Histogram of driver pay on weekends vs weekdays/Histogram of trip minutes on weekends vs weekdays
-- These graphs showed that there is a slight difference between weekdays and weekends in terms of driver pay and trip minutes. This would also be evidence for a potential confounder in our causal inference model. However, since the difference is not obvious, we should explore this further.
-
-Scatter plot of temperature vs driver pay/Scatterplot of precipitation vs driver pay
-- The scatterplots of temperature and precipitation showed slight positive correlations with driver pay, so we should include it in our GLMs/random forest model, making it relevant to our second research question. 
 ## Causal Inference
 ### Set-Up
 - Research Question: How does ride-share trip minutes have an effect on driver pay? 
@@ -88,12 +61,18 @@ Scatter plot of temperature vs driver pay/Scatterplot of precipitation vs driver
 - Units: Rides
 - Technique Used: OLS Regression
 
-
+<img width="401" alt="Screen Shot 2023-07-01 at 10 40 31 PM" src="https://github.com/serenabai/NYC-Ubers/assets/78036684/b1ecb368-2807-4131-948b-8295c6ca6d4a">
 
 We assumed that the trip being on a weekday or weekend would affect trip_minutes, as weekdays have surges in traffic, particularly during rush hours, which would affect how long a trip would take. Additionally, a trip being on a weekday or weekend would also directly affect driver_pay, as there are different supply and demands on the weekday vs. weekend. Another assumption we made about trip_miles affects trip_minutes and driver_pay directly, as this is something that is provided by Uber and Lyft websites in determining how much a driver gets paid. The trip_miles determine the base_passenger_fare, which is accounted for in the overall driver_pay.
+
 ### Methods
 Our causal inference methods include the relevant variables of weekend, trip_miles, trip_minutes, and driver_pay. The trip_minutes is the treatment variable while driver_pay is our outcome. The two confounding variables trip_miles and weekend (weekend being Friday, Saturday, Sunday and weekday being Monday, Tuesday, Wednesday, Thursday). Both of these confounding variables affect the treatment and the outcome but are not personally the treatment or the outcome, so the unconfoundedness assumption does not hold in this instance. The methods we used to adjust for confounders were to include both confounders, trip_miles and weekend, in our regression to account for their effect on the outcome. There are no colliders in our data set. 
+
 ### Results
+
+<img width="463" alt="Screen Shot 2023-07-01 at 10 41 31 PM" src="https://github.com/serenabai/NYC-Ubers/assets/78036684/d10c65ed-c97a-4d66-8f43-9860e7c2be67">
+
+
 Based on our OLS regression results, trip_minutes has a positive causal effect and increases driver_pay for Uber trips by 27 cents. The estimated causal effect on driver_pay by our confounding variable weekend (Friday-Sunday) is around 11 cents. Our other confounding variable trip_miles increases driver_pay by 53 cents. The causal effect on driver_pay on base_passenger_fare is 46 cents. We reject the null hypothesis, since our p-values are approximately all zero, and zero does not lie in any of the variables’ confidence intervals. One uncertainty in our estimate comes from not knowing for sure that our confounding variables weekend and trip_miles are the only confounders. Furthermore, because our dataset is very large, we could only use data for the first full week of April 2022 (April 3rd-9th), so there could also be uncertainties that come from not using a whole year’s data.
 
 
@@ -105,7 +84,7 @@ We were limited by the variables available in our datasets for our causal infere
 
 Although the variables we used for our causal inference model all have an expected positive causal effect on driver_pay, there is additional data that would be useful in predicting driver_pay. Another dataset we could use would be rider demand data, which would directly impact driver_pay as Uber makes use of surge pricing during times of peak demand. The type of road each driver took could also have an impact on trip_minute and act as an instrumental variable to determine driver_pay. For example, even if trip_miles was long, if the driver took the highway instead of a city street, trip_minutes would decrease significantly causing driver_pay to decrease.
 
-From our research, we expected positive coefficients from all of the variables in our model as we believed that each variable has a positive causal effect on driver_pay. Our OLS regression results matched our expectations, giving us confidence that there’s a causal relationship between our chosen treatment and outcome. Furthermore, all our variables’ p-values are approximately zero, and zero does not lie in any of the variables’ confidence intervals, which strengthens the idea that there is a causal relationship. However, we are not as confident about the true coefficients of our variables’ effects on driver_pay as we did not consider the entire dataset of 2022.
+From our research, we expected positive coefficients from all of the variables in our model as we believed that each variable has a positive causal effect on driver_pay. Our OLS regression results matched our expectations, giving us confidence that there’s a causal relationship between our chosen treatment and outcome. Furthermore, all our variables’ p-values are approximately zero, and zero does not lie in any of the variables’ confidence intervals, which strengthens the idea that there is a causal relationship. 
 
 ## GLMs & Nonparametric Methods
 ### Methods
@@ -123,11 +102,16 @@ The non-parametrics will be trained on a training dataset that is made up of 70%
 
 #### Bayesian Approach
 
+
 While we initially chose to use the Gaussian GLM, using trip_miles, trip_minutes, and precipitation as predictors. However, plotting the predictive posterior distribution showed that it was not a great fit for our data, as the credible intervals were much too narrow. Reasoning that because the driver_pay data is very dispersed, we also tried to apply the Poisson and Negative Binomial GLMs. Pictured below are the posterior predictive distributions for each GLM, visualized against each of the predictive variables.
+
+<img width="478" alt="Screen Shot 2023-07-01 at 10 43 38 PM" src="https://github.com/serenabai/NYC-Ubers/assets/78036684/8df1dd8a-ec2a-4df2-9cb1-1caf347d23ed">
+<img width="481" alt="Screen Shot 2023-07-01 at 10 42 59 PM" src="https://github.com/serenabai/NYC-Ubers/assets/78036684/cb641a00-6256-4d8a-bb98-d211cf3ecd61">
 
 
 Based on these visualizations, it seems that the Gaussian model, though not perfect, is the best option, as its 95% confidence interval fits the data most closely for trip_minutes and trip_miles. We also see that none of the PPDs for predicting driver pay using precipitation seem suited to the data, suggesting that we should not include precipitation in our model. Therefore, we run the model again using only trip minutes and trip miles, getting the following posterior results. 
 
+<img width="498" alt="Screen Shot 2023-07-01 at 10 44 25 PM" src="https://github.com/serenabai/NYC-Ubers/assets/78036684/9b3f96f1-27ac-4d2a-8072-aa1addc3c350">
 
 As we can see in these results, using the Gaussian model with variables trip_miles and trip_minutes gave coefficients of approximately 2.70 for trip_miles and 1.50 for trip_minutes. Since the Gaussian model uses the identity link function, this means that driver_pay is predicted to increase by 2.7 for every increase in trip_miles and by 1.5 for every increase in trip minutes. However, we also see that the spread for each coefficient is very low, much lower than the spread of the actual data. Therefore, we can conclude that the Gaussian GLM is not the most optimal way to predict driver_pay from trip_miles and trip_minutes.
 
@@ -142,33 +126,26 @@ The chi square value measures the difference between observed and expected frequ
 
 Gaussian Model 
 
+<img width="466" alt="Screen Shot 2023-07-01 at 10 44 56 PM" src="https://github.com/serenabai/NYC-Ubers/assets/78036684/d3ed3b14-28c8-4196-9460-c20fab888d81">
+
 Under the Gaussian model, we see that trip_miles increases driver pay by 1.4915, trip_miles increases driver pay by 0.4780, precipitation increases driver pay by 0.7983, and hour increases driver pay by 0.0572. The confidence intervals all greater than 0 and the large z score values indicate that the confidence interval is small but still statistically significant. 
 
 Poisson Model 
 
+<img width="433" alt="Screen Shot 2023-07-01 at 10 45 36 PM" src="https://github.com/serenabai/NYC-Ubers/assets/78036684/eddf0b02-9df0-4463-9dd6-5f0189a40967">
+
 Under the Poisson model, we see that trip_miles increases driver pay by 0.0009, trip_miles increases driver pay by 0.0174, precipitation increases driver pay by 0.0304, and hour increases driver pay by 00012. Here, the z-score values are still quite large, but particular values, such as a z-score of 59.453 for hour indicate a greater confidence for that coefficient. 
 
 Tweedie Model 
+
+<img width="417" alt="Screen Shot 2023-07-01 at 10 46 01 PM" src="https://github.com/serenabai/NYC-Ubers/assets/78036684/8f1acf1c-e61b-4e6f-9cd6-2cce5c009bb2">
 
 Under the Tweedie model, we see that trip_miles increases driver pay by 0.0009, trip_miles increases driver pay by 0.0174, precipitation increases driver pay by 0.0304, and hour increases driver pay by 00012. These are the same coefficient values we observed in the Poisson distribution except here, there is even greater variation in z-score values. This model features the smallest z-score value from our analysis of 27.790 for hour which indicates a higher confidence interval. 
 
 ### Nonparametric Results
 The performance of the non-parametrics results are shown in the table below:
 
-Decision Tree
-Random Forest
-Training Set MAE
--2.72e-17
--2.75e-17
-Test Set MAE
-0.00121
-0.0013
-Training Set RMSE
-5.40025
-5.5936
-Test Set RMSE
-7.9454
-7.3594
+<img width="404" alt="Screen Shot 2023-07-01 at 10 46 40 PM" src="https://github.com/serenabai/NYC-Ubers/assets/78036684/6928f5ba-8093-42ba-83bc-2f1356a63f75">
 
 
 Based on the MAE, we see that the Decision Tree predicted `driver_pay` slightly better than the Random Forest did on the test set, which is interesting, since the Random Forest usually predicts better than Decision Trees do. However, using RMSE to measure performance, we see that the Random Forest predicted better on the test set, with an error of 7.36 compared to 7.95 from the Decision Tree. 
@@ -203,4 +180,10 @@ Our findings have the potential to provide more work-hour & compensation to Uber
 We merged TLC data and weather data sourced from the open-meteo API. The benefits of this was that we were able to incorporate another dimension of data into our predictions, using weather data to predict driver pay. There are not any noticeable consequences of combining different sources beyond the fact that the weather data was not useful in predicting driver pay.
 
 Some limitations in our data include the fact that we only used data from one week due to the overwhelming volume of data in our original set. Performing the same analysis on data from different months could reveal meaningful insights about how driver pay could differ depending on the time of the year. In addition, we only used less than 1% of this already narrow frame to build our GLMs. In the future, it may be meaningful to use a larger portion of our data and see if the results are the same. To continue our exploration, we could test our current GLMs and nonparametric model on newer test data to see how generalizable our models are. We also did not use priors for our Bayesian GLMs since we did not have any meaningful assumptions. In the future, bringing in additional domain knowledge to build those priors could be beneficial to building a more accurate model. Finally, since we narrowed our dataset to only Uber rides in New York, future studies could explore similar research questions relating to other rideshare options such as Lyft, or in other major cities in the US to see if there are any meaningful differences. 
+
+Some additional features we wished we had that would improve the specificity of our data include the following: 
+A measure for traffic: Traffic can affect the expected vs actual ETA which could then affect the driver’s pay and reviews. 
+Number of stop lights: Similar to a measure of traffic, stop lights could affect the estimated drive time and the expected base pay and driver pay. 
+Whether or not there was surge pricing: Popular areas and times of day affect pricing when there is an increased demand and limited supply for Ubers. This information could have been useful in estimating how certain geographic locations were affected surge pricing throughout the day. 
+Expected length (minutes) of trip: The expected minutes for the trip may be useful in predicting driver pay because the driver pay likely doesn’t account for traffic that shows up in the middle of a ride.
 
