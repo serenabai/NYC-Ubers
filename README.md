@@ -49,7 +49,7 @@ Visualizations
 - Scatterplot of temperature vs driver pay
 - Scatterplot of precipitation vs driver pay
 
-
+![Uploading Screen Shot 2023-07-01 at 10.29.23 PM.png…]()
 
 
 
